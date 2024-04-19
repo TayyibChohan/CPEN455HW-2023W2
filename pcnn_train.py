@@ -156,9 +156,17 @@ if __name__ == '__main__':
     
     elif "cpen455" in args.dataset:
         ds_transforms = transforms.Compose([transforms.Resize((32, 32)), rescaling])
+        train_transform = Compose([
+        Resize((32, 32)),  # Resize images to 32 * 32
+        RandomRotation(10),  # Randomly rotate the image by 10 degrees
+        ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),  # Randomly change the brightness, contrast, saturation, and hue of the image
+        RandomHorizontalFlip(),  # Randomly flip the image horizontally
+        RandomVerticalFlip(),  # Randomly flip the image vertically
+        rescaling  # Normalize to [0, 1]
+        ])
         train_loader = torch.utils.data.DataLoader(CPEN455Dataset(root_dir=args.data_dir, 
                                                                   mode = 'train', 
-                                                                  transform=ds_transforms), 
+                                                                  transform=train_transform),
                                                    batch_size=args.batch_size, 
                                                    shuffle=True, 
                                                    **kwargs)
