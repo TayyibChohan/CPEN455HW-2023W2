@@ -201,7 +201,9 @@ if __name__ == '__main__':
         print('model parameters loaded')
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=args.lr_decay)
+    optimizer = optim.AdamW(model.parameters(), weight_decay=1e-5)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=args.lr_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=1e-5, last_epoch=-1)
     
     for epoch in tqdm(range(args.max_epochs)):
         train_or_test(model = model, 
