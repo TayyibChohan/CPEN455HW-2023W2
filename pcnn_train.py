@@ -158,7 +158,7 @@ if __name__ == '__main__':
         ds_transforms = transforms.Compose([transforms.Resize((32, 32)), rescaling])
         train_transform = Compose([
         Resize((32, 32)),  # Resize images to 32 * 32
-        RandomRotation(10),  # Randomly rotate the image by 10 degrees
+        # RandomRotation(90),  # Randomly rotate the image by 90 degrees
         ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),  # Randomly change the brightness, contrast, saturation, and hue of the image
         RandomHorizontalFlip(),  # Randomly flip the image horizontally
         RandomVerticalFlip(),  # Randomly flip the image vertically
