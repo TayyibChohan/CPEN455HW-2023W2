@@ -104,7 +104,7 @@ class PixelCNN(nn.Module):
 
     def forward(self, x, labels=None, sample=False):
         if labels == None:
-            labels = self.predict(x, sample).to(x.device)
+            labels = self.predict(x, sample)[0].to(x.device)
 
         # similar as done in the tf repo :
         if self.init_padding is not sample:
@@ -179,12 +179,13 @@ class PixelCNN(nn.Module):
     def predict(self, x, sample=False):
         x_new = x.repeat(self.NUM_CLASSES, 1, 1, 1)
         labels = torch.arange(self.NUM_CLASSES).repeat_interleave(x.shape[0])
-        losses = self.forward(x_new, labels=labels, sample=sample)
-        losses = discretized_mix_logistic_loss_batch(x_new, losses)
+        logits = self.forward(x_new, labels=labels, sample=sample)
+        losses = discretized_mix_logistic_loss_batch(x_new, logits)
         losses = losses.view(self.NUM_CLASSES, -1).permute(1, 0)
-        return torch.argmin(losses, dim=1)
-    
-    
+        loss = torch.min(losses, dim=1)[0]
+        answer = torch.argmin(losses, dim=1)
+        return answer, loss, logits
+        
 class random_classifier(nn.Module):
     def __init__(self, NUM_CLASSES):
         super(random_classifier, self).__init__()

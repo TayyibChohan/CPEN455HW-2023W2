@@ -244,7 +244,7 @@ def right_shift(x, pad=None):
 def sample(model, sample_batch_size, obs, sample_op, labels=None):
     model.train(False)
     if labels is None:
-        labels = torch.randint(0, model.NUM_CLASSES, (sample_batch_size,)).long()
+        labels = torch.arange(model.NUM_CLASSES).long().view(-1, 1).repeat(1, sample_batch_size // model.NUM_CLASSES).view(-1)
     with torch.no_grad():
         data = torch.zeros(sample_batch_size, obs[0], obs[1], obs[2])
         data = data.to(next(model.parameters()).device)

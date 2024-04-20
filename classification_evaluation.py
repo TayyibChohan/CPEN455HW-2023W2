@@ -14,26 +14,55 @@ from tqdm import tqdm
 from pprint import pprint
 import argparse
 NUM_CLASSES = len(my_bidict)
+import csv
 
 # Write your code here
 # And get the predicted label, which is a tensor of shape (batch_size,)
 # Begin of your code
 def get_label(model, model_input, device):
-    answer = model.predict(model_input).to(device)
-    return answer
+    answer, loss, logits = model.predict(model_input)
+    # return answer, loss, logits
+    return answer, logits
 # End of your code
 
 def classifier(model, data_loader, device):
     model.eval()
     acc_tracker = ratio_tracker()
+##############################################################
+    image_path_label = []
+    test_logits = np.empty((0, NUM_CLASSES))
+    with open('data/test.csv', 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            row = row[0].split('/')[-1]
+            image_path_label.append((row, -1))
+
+    i = 0
+##############################################################
+
     for batch_idx, item in enumerate(tqdm(data_loader)):
         model_input, categories = item
         model_input = model_input.to(device)
         original_label = [my_bidict[item] for item in categories]
         original_label = torch.tensor(original_label, dtype=torch.int64).to(device)
-        answer = get_label(model, model_input, device)
+        answer, logits = get_label(model, model_input, device)
         correct_num = torch.sum(answer == original_label)
         acc_tracker.update(correct_num.item(), model_input.shape[0])
+
+##############################################################
+        for a in answer:
+            image_path_label[i] = (image_path_label[i][0], a.item())
+            i += 1
+
+    with open('answers2.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['id', 'label'])
+        for row in image_path_label:
+            writer.writerow(row)
+    
+    # save test_logits as npy file
+    np.save('test_logits.npy', test_logits)
+##############################################################
     
     return acc_tracker.get_ratio()
         
